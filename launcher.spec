@@ -5,7 +5,13 @@ a = Analysis(
     ['launcher.py'],
     pathex=[],
     binaries=[],
-    datas=[('D:\\mobbo1\\New NRS\\Homer7\\plutoBg.png', '.'), ('D:\\mobbo1\\New NRS\\Homer7\\marsBg.png', '.')],
+    datas=[
+        ('Mars.png', '.'),
+        ('Pluto.png', '.'),
+        ('marsBg.png', '.'),
+        ('plutoBg.png', '.'),
+        ('config.ini', '.')
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

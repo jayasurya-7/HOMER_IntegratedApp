@@ -9,8 +9,7 @@ a = Analysis(
         ('Mars.png', '.'),
         ('Pluto.png', '.'),
         ('marsBg.png', '.'),
-        ('plutoBg.png', '.'),
-        ('config.ini', '.')
+        ('plutoBg.png', '.')
     ],
     hiddenimports=[],
     hookspath=[],

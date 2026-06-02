@@ -7,22 +7,32 @@ from datetime import datetime
 from PIL import Image, ImageTk
 
 # === Config file for password ===
-CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
+CONFIG_FILE = r"C:\DeviceSetups\config.ini"
 
 def get_password():
     """Get stored password from config file"""
+    print(f"[DEBUG] Looking for config at: {CONFIG_FILE}")
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, 'r') as f:
-                return f.read().strip()
-        except:
+                pwd = f.read().strip()
+                print(f"[DEBUG] Password found in config file")
+                return pwd
+        except Exception as e:
+            print(f"[ERROR] Failed to read config: {e}")
             return None
+    print(f"[DEBUG] Config file not found")
     return None
 
 def save_password(password):
     """Save password to config file"""
-    with open(CONFIG_FILE, 'w') as f:
-        f.write(password)
+    try:
+        with open(CONFIG_FILE, 'w') as f:
+            f.write(password)
+        print(f"[DEBUG] Password saved to: {CONFIG_FILE}")
+    except Exception as e:
+        print(f"[ERROR] Failed to save password: {e}")
+        messagebox.showerror("Error", f"Failed to save password:\n{e}")
 
 def ask_password():
     """Ask for password dialog - professional centered design"""
@@ -165,8 +175,8 @@ def resource_path(relative_path):
 
 # === Game paths (keep absolute if external .exe) ===
 # Demo games (no authentication required)
-DEMO_GAME1_PATH = r"C:\HOMER_DEMO_PLUTO\PLUTO_DEMO.exe"
-DEMO_GAME2_PATH = r"C:\HOMER_DEMO_MARS\MARS_DEMO.exe"
+DEMO_GAME1_PATH = r"C:\HOMER_DEMO_PLUTO\PLUTO.exe"
+DEMO_GAME2_PATH = r"C:\HOMER_DEMO_MARS\MARS.exe"
 
 # Real training games (authentication required)
 GAME1_PATH = r"C:\HOMER_PLUTO\PLUTO.exe"
@@ -262,14 +272,7 @@ def is_training_completed(setup_file):
     except Exception:
         return False
 
-def launch_game(path, device_name):
-    """Launch game"""
-    # Check if game executable exists
-    if os.path.exists(path):
-        subprocess.Popen([path])
-        root.destroy()
-    else:
-        messagebox.showerror("Error", f"Game not found:\n{path}")
+
 
 def show_animation_then_auth():
     """Show HOMER animation with professional letter-by-letter appearance and growth"""
@@ -466,8 +469,8 @@ def show_demo_games():
         )
         card.pack(side=tk.LEFT, padx=30, ipadx=0, ipady=0, expand=True, fill=tk.BOTH)
 
-        # Larger card size (taller to accommodate all content)
-        card.configure(width=450, height=620)
+        # Card size
+        card.configure(width=450, height=520)
         card.pack_propagate(False)
 
         def on_enter(_):
@@ -516,30 +519,13 @@ def show_demo_games():
                 bg=ACCENT_DARK,
                 fg="#00d9a5"
             )
-        subtitle.pack(expand=False, pady=(0, 15))
+        subtitle.pack(expand=False, pady=(0, 5))
 
         # Content section
         content_frame = tk.Frame(inner, bg=ACCENT_DARK)
-        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
 
-        # Features list
-        features = [
-            "• Interactive Tutorial",
-            "• Practice Mode",
-            "• Learn Controls"
-        ]
-
-        for feature in features:
-            feature_label = tk.Label(
-                content_frame,
-                text=feature,
-                font=("Segoe UI", 10),
-                bg=ACCENT_DARK,
-                fg=TEXT_SECONDARY,
-                justify=tk.LEFT
-            )
-            feature_label.pack(anchor="w", padx=5, pady=3)
-
+      
         # Button section (at bottom)
         btn_frame = tk.Frame(inner, bg=ACCENT_DARK)
         btn_frame.pack(expand=False, fill=tk.X, pady=(0, 0))
@@ -556,7 +542,7 @@ def show_demo_games():
             fg=btn_fg,
             activebackground="#ffffff" if not is_completed else "#888888",
             activeforeground=color if not is_completed else "#cccccc",
-            command=lambda: launch_game(game_path, name) if not is_completed else None,
+            command=lambda:launch_game (game_path, name) if not is_completed else None,
             bd=0,
             highlightthickness=0,
             cursor="hand2" if not is_completed else "arrow",
@@ -576,29 +562,56 @@ def show_demo_games():
     create_demo_card(cards_frame, "MARS", MARS_COLOR, mars_img, DEMO_GAME2_PATH, MARS_DEMO_DONE)
 
 
+
+
+
 def launch_game(path, _):
-    """Launch game and proceed to authentication after demo closes"""
+    """Launch game - close for training, wait for demo"""
     if os.path.exists(path):
         import threading
 
         process = subprocess.Popen([path])
 
-        def wait_for_game_close():
-            """Wait for game to close, then check if both demos are done"""
-            process.wait()
-            # Game closed, check if both demos are completed
-            mars_demo_done = is_demo_completed(MARS_DEMO_DONE)
-            pluto_demo_done = is_demo_completed(PLUTO_DEMO_DONE)
+        # Check if this is a training game (not demo)
+        is_training_game = (path == GAME1_PATH or path == GAME2_PATH)
 
-            if mars_demo_done and pluto_demo_done:
-                # Both demos completed, proceed to authentication
-                root.after(100, show_auth_or_games)
-            else:
-                # One or both demos not complete, go back to demo screen
-                root.after(100, show_demo_games)
+        print(f"[DEBUG] Game path: {path}")
+        print(f"[DEBUG] GAME1_PATH: {GAME1_PATH}")
+        print(f"[DEBUG] GAME2_PATH: {GAME2_PATH}")
+        print(f"[DEBUG] Is training game: {is_training_game}")
 
-        # Launch in background thread so UI stays responsive
-        threading.Thread(target=wait_for_game_close, daemon=True).start()
+        if is_training_game:
+            # For training games, close the launcher immediately
+            print("[DEBUG] Training game launched, closing launcher")
+            root.destroy()
+            sys.exit()
+        else:
+            # For demo games, wait for game to close
+            def wait_for_game_close():
+                """Wait for game to close, then check if both demos are done"""
+                import time
+                process.wait()
+                time.sleep(2)  # Wait 2 seconds for flag files to be written
+
+                # Game closed, check if both demos are completed
+                mars_demo_done = is_demo_completed(MARS_DEMO_DONE)
+                pluto_demo_done = is_demo_completed(PLUTO_DEMO_DONE)
+
+                print(f"[DEBUG] Game closed. Mars done: {mars_demo_done}, Pluto done: {pluto_demo_done}")
+                print(f"[DEBUG] Mars flag file: {MARS_DEMO_DONE}")
+                print(f"[DEBUG] Pluto flag file: {PLUTO_DEMO_DONE}")
+
+                if mars_demo_done and pluto_demo_done:
+                    # Both demos completed, shutdown system immediately
+                    print("[DEBUG] Both demos completed, shutting down system immediately")
+                    shutdown_system(delay=0)
+                else:
+                    # One or both demos not complete, go back to demo screen
+                    print("[DEBUG] Not all demos completed, returning to demo screen")
+                    root.after(100, show_demo_games)
+
+            # Launch in background thread so UI stays responsive
+            threading.Thread(target=wait_for_game_close, daemon=True).start()
     else:
         messagebox.showerror("Error", f"Game not found:\n{path}")
 
@@ -704,8 +717,8 @@ def show_game_selection():
         )
         card.pack(side=tk.LEFT, padx=30, ipadx=0, ipady=0, expand=True, fill=tk.BOTH)
 
-        # Larger card size (taller to accommodate all content)
-        card.configure(width=450, height=620)
+        # Card size
+        card.configure(width=450, height=520)
         card.pack_propagate(False)
 
         # Hover effect
@@ -722,18 +735,15 @@ def show_game_selection():
         inner = tk.Frame(card, bg=ACCENT_DARK)
         inner.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Image section with background
-        img_frame = tk.Frame(inner, bg="#0f0f15", highlightthickness=1, highlightbackground=color)
-        img_frame.pack(expand=False, pady=(0, 15), padx=10)
-
+        # Image section (no frame)
         if image:
             img_label = tk.Label(
-                img_frame,
+                inner,
                 image=image,
-                bg="#0f0f15"
+                bg=ACCENT_DARK
             )
             img_label.image = image
-            img_label.pack(padx=15, pady=15)
+            img_label.pack(expand=False, pady=(0, 15))
 
         # Title
         title = tk.Label(
@@ -753,31 +763,13 @@ def show_game_selection():
             bg=ACCENT_DARK,
             fg="#00d9a5"
         )
-        subtitle.pack(expand=False, pady=(0, 15))
+        subtitle.pack(expand=False, pady=(0, 5))
 
         # Content section
         content_frame = tk.Frame(inner, bg=ACCENT_DARK)
-        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
 
-        # Features list
-        features = [
-            "• Full Training Program",
-            "• Advanced Challenges",
-            "• Performance Tracking",
-            "• Real-time Feedback"
-        ]
-
-        for feature in features:
-            feature_label = tk.Label(
-                content_frame,
-                text=feature,
-                font=("Segoe UI", 10),
-                bg=ACCENT_DARK,
-                fg=TEXT_SECONDARY,
-                justify=tk.LEFT
-            )
-            feature_label.pack(anchor="w", padx=5, pady=3)
-
+      
         # Button section (at bottom)
         btn_frame = tk.Frame(inner, bg=ACCENT_DARK)
         btn_frame.pack(expand=False, fill=tk.X, pady=(0, 0))
@@ -826,11 +818,34 @@ root.title("HOMER Training System")
 root.attributes("-fullscreen", True)
 root.protocol("WM_DELETE_WINDOW", lambda: None)
 
+# Disable window controls (minimize, maximize, close button)
+root.attributes("-toolwindow", False)
+root.resizable(False, False)
+
+# Magic button: Shift+Escape to close application
+def magic_close(event=None):
+    """Secret button to close application"""
+    root.destroy()
+    sys.exit()
+
+root.bind("<Shift-Escape>", magic_close)
+
 # === Check if training is completed for both devices ===
 mars_completed = is_training_completed(MARS_SETUP)
 pluto_completed = is_training_completed(PLUTO_SETUP)
 both_completed = mars_completed and pluto_completed
 
+
+def shutdown_system(delay=0):
+    """Shutdown system with optional delay (in seconds)"""
+    print(f"[DEBUG] System will shutdown in {delay} seconds...")
+    import time
+    time.sleep(delay)
+    os.system(f"shutdown /s /t 0")
+    root.destroy()
+    sys.exit()
+   
+    
 # === If training is completed for both, show completion message with shutdown ===
 if both_completed:
     # Professional completion screen
@@ -877,9 +892,6 @@ if both_completed:
     )
     subtitle.pack(pady=(0, 40))
     
-    def shutdown():
-        root.destroy()
-    
     # Shutdown button
     shutdown_btn = tk.Button(
         center_frame, 
@@ -889,7 +901,7 @@ if both_completed:
         fg="white",
         activebackground="#ff6b6b",
         activeforeground="white",
-        command=shutdown,
+        command=shutdown_system,
         bd=0,
         highlightthickness=0,
         cursor="hand2",
@@ -897,6 +909,7 @@ if both_completed:
         height=1
     )
     shutdown_btn.pack(pady=10)
+    # shutdown_system(delay=10)  # Auto shutdown after 30 seconds
 else:
     # Start with animation
     show_animation_then_auth()

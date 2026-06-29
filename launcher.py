@@ -476,7 +476,7 @@ def show_animation_then_auth():
     anim_canvas.bind("<Configure>", on_canvas_configure)
 
 def show_demo_games():
-    """Show demo game selection (no authentication required)"""
+    """Show demo game selection with professional healthcare design"""
     # Check if both demos are already completed
     if is_demo_completed(MARS_DEMO_DONE) and is_demo_completed(PLUTO_DEMO_DONE):
         show_auth_or_games()
@@ -489,11 +489,12 @@ def show_demo_games():
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
 
-    # Colors
-    BG_COLOR = "#1A1A30"
-    ACCENT_DARK = "#1a1a3e"
+    # Dark professional color scheme
+    BG_COLOR = "#0a0a0a"
+    HEADER_COLOR = "#1a1a1a"
+    CARD_BG = "#151515"
     TEXT_PRIMARY = "#ffffff"
-    TEXT_SECONDARY = "#888888"
+    TEXT_SECONDARY = "#999999"
     PLUTO_COLOR = "#2bd887"
     MARS_COLOR = "#ff8e55"
 
@@ -504,44 +505,58 @@ def show_demo_games():
     main_frame.grid(row=0, column=0, sticky="nsew")
 
     # Header
-    header = tk.Frame(main_frame, bg=ACCENT_DARK, height=100)
+    header = tk.Frame(main_frame, bg=HEADER_COLOR, height=120)
     header.pack(fill=tk.X)
     header.pack_propagate(False)
 
-    robot_icon = tk.Label(
+    # Header icon
+    icon_label = tk.Label(
         header,
         text="🎮",
-        font=("Segoe UI", 48),
-        bg=ACCENT_DARK,
-        fg="#00d9a5"
-    )
-    robot_icon.pack(side=tk.LEFT, padx=20, pady=10)
-
-    header_label = tk.Label(
-        header,
-        text="Demo Mode - Try Before Training",
-        font=("Segoe UI", 28, "bold"),
-        bg=ACCENT_DARK,
+        font=("Arial", 48),
+        bg=HEADER_COLOR,
         fg=TEXT_PRIMARY
     )
-    header_label.pack(side=tk.LEFT, padx=10, pady=10)
+    icon_label.pack(side=tk.LEFT, padx=30, pady=15)
 
-    # Content area
+    # Header text section
+    header_text_frame = tk.Frame(header, bg=HEADER_COLOR)
+    header_text_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=15)
+
+    header_title = tk.Label(
+        header_text_frame,
+        text="Demo Mode",
+        font=("Arial", 32, "bold"),
+        bg=HEADER_COLOR,
+        fg=TEXT_PRIMARY
+    )
+    header_title.pack(anchor="w")
+
+    header_subtitle = tk.Label(
+        header_text_frame,
+        text="Try Before Training",
+        font=("Arial", 14),
+        bg=HEADER_COLOR,
+        fg="#cccccc"
+    )
+    header_subtitle.pack(anchor="w", pady=(3, 0))
+
+    # Content area - maximize space usage
     content = tk.Frame(main_frame, bg=BG_COLOR)
-    content.pack(fill=tk.BOTH, expand=True, padx=40, pady=40)
+    content.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
 
-    # Card container
+    # Card container - horizontal layout for full screen
     cards_frame = tk.Frame(content, bg=BG_COLOR)
-    cards_frame.pack(expand=True, anchor="center")
+    cards_frame.pack(fill=tk.BOTH, expand=True)
 
-    # Load images (larger)
+    # Load images - maintain natural aspect ratio
     try:
         pluto_pil = Image.open(resource_path("Pluto.png"))
-        pluto_pil = pluto_pil.resize((200, 200), Image.Resampling.LANCZOS)
+        pluto_pil = pluto_pil.resize((300, 300), Image.Resampling.LANCZOS)
         pluto_img = ImageTk.PhotoImage(pluto_pil)
 
         mars_pil = Image.open(resource_path("Mars.png"))
-        mars_pil = mars_pil.resize((200, 240), Image.Resampling.LANCZOS)
+        mars_pil = mars_pil.resize((300, 300), Image.Resampling.LANCZOS)
         mars_img = ImageTk.PhotoImage(mars_pil)
     except Exception as e:
         messagebox.showerror("Error", f"Could not load images: {e}")
@@ -549,101 +564,102 @@ def show_demo_games():
         mars_img = None
 
     def create_demo_card(parent, name, color, image, game_path, flag_file):
-        """Create a professional demo game card with completion status"""
+        """Create large modern healthcare-styled game card"""
         is_completed = is_demo_completed(flag_file)
 
         card = tk.Frame(
             parent,
-            bg=ACCENT_DARK,
-            highlightthickness=2,
-            highlightbackground=color,
-            highlightcolor=color
+            bg=CARD_BG,
+            highlightthickness=0,
+            relief=tk.FLAT
         )
-        card.pack(side=tk.LEFT, padx=30, ipadx=0, ipady=0, expand=True, fill=tk.BOTH)
+        card.pack(side=tk.LEFT, padx=15, ipadx=0, ipady=0, expand=True, fill=tk.BOTH)
 
-        # Card size
-        card.configure(width=450, height=520)
-        card.pack_propagate(False)
+        # Cards expand to fill all available space
+
+        # Top colored bar - thicker for modern accent
+        top_bar = tk.Frame(card, bg=color, height=8)
+        top_bar.pack(fill=tk.X)
+        top_bar.pack_propagate(False)
 
         def on_enter(_):
             if not is_completed:
-                card.configure(highlightthickness=4)
+                card.configure(bg="#2a3b4d")
 
         def on_leave(_):
-            card.configure(highlightthickness=2)
+            card.configure(bg=CARD_BG)
 
         card.bind("<Enter>", on_enter)
         card.bind("<Leave>", on_leave)
 
-        inner = tk.Frame(card, bg=ACCENT_DARK)
-        inner.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        inner = tk.Frame(card, bg=CARD_BG)
+        inner.pack(fill=tk.BOTH, expand=True, padx=35, pady=35)
 
-        # Image section
+        # Image section - larger images with top gap
         if image:
-            img_label = tk.Label(inner, image=image, bg=ACCENT_DARK)
+            img_label = tk.Label(inner, image=image, bg=CARD_BG)
             img_label.image = image
-            img_label.pack(expand=False, pady=(0, 15))
+            img_label.pack(expand=False, pady=(50, 30))
 
-        # Title
+        # Title - much larger
         title = tk.Label(
             inner,
             text=name,
-            font=("Segoe UI", 36, "bold"),
-            bg=ACCENT_DARK,
+            font=("Arial", 56, "bold"),
+            bg=CARD_BG,
             fg=color
         )
-        title.pack(expand=False, pady=(0, 5))
+        title.pack(expand=False, pady=(0, 12))
 
         # Subtitle
         if is_completed:
             subtitle = tk.Label(
                 inner,
                 text="✓ Demo Completed",
-                font=("Segoe UI", 11, "bold"),
-                bg=ACCENT_DARK,
-                fg="#2bd887"
+                font=("Arial", 14, "bold"),
+                bg=CARD_BG,
+                fg="#888888"
             )
         else:
             subtitle = tk.Label(
                 inner,
-                text="Try Before Training",
-                font=("Segoe UI", 11),
-                bg=ACCENT_DARK,
-                fg="#00d9a5"
+                text="Experience the Game",
+                font=("Arial", 14),
+                bg=CARD_BG,
+                fg=TEXT_SECONDARY
             )
-        subtitle.pack(expand=False, pady=(0, 5))
+        subtitle.pack(expand=False, pady=(0, 30))
 
         # Content section
-        content_frame = tk.Frame(inner, bg=ACCENT_DARK)
-        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
+        content_frame = tk.Frame(inner, bg=CARD_BG)
+        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 30))
 
-      
         # Button section (at bottom)
-        btn_frame = tk.Frame(inner, bg=ACCENT_DARK)
-        btn_frame.pack(expand=False, fill=tk.X, pady=(0, 0))
+        btn_frame = tk.Frame(inner, bg=CARD_BG)
+        btn_frame.pack(expand=False, fill=tk.X, pady=(20, 0))
 
         btn_text = "✓ COMPLETED" if is_completed else "▶ LAUNCH DEMO"
-        btn_bg = "#888888" if is_completed else color
+        btn_bg = "#555555" if is_completed else color
         btn_fg = "#cccccc" if is_completed else "white"
 
         btn = tk.Button(
             btn_frame,
             text=btn_text,
-            font=("Segoe UI", 13, "bold"),
+            font=("Arial", 15, "bold"),
             bg=btn_bg,
             fg=btn_fg,
-            activebackground="#ffffff" if not is_completed else "#888888",
-            activeforeground=color if not is_completed else "#cccccc",
-            command=lambda:launch_game (game_path, name) if not is_completed else None,
+            activebackground="#ffffff" if not is_completed else "#666666",
+            activeforeground=color if not is_completed else "#dddddd",
+            command=lambda: launch_game(game_path, name) if not is_completed else None,
             bd=0,
             highlightthickness=0,
             cursor="hand2" if not is_completed else "arrow",
-            width=18,
-            padx=15,
-            pady=8,
-            state=tk.DISABLED if is_completed else tk.NORMAL
+            padx=30,
+            pady=15,
+            state=tk.DISABLED if is_completed else tk.NORMAL,
+            relief=tk.FLAT
         )
-        btn.pack()
+        btn.pack(fill=tk.X)
 
         if not is_completed:
             card.bind("<Button-1>", lambda _: launch_game(game_path, name))
@@ -732,66 +748,80 @@ def show_auth_or_games():
     show_game_selection()
 
 def show_game_selection():
-    """Show professional game selection UI with image icons"""
+    """Show professional training game selection with healthcare design"""
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
-    
-    # Colors
-    BG_COLOR = "#0f0f23"
-    ACCENT_DARK = "#1a1a3e"
+
+    # Dark professional color scheme
+    BG_COLOR = "#0a0a0a"
+    HEADER_COLOR = "#1a1a1a"
+    CARD_BG = "#151515"
     TEXT_PRIMARY = "#ffffff"
-    TEXT_SECONDARY = "#888888"
+    TEXT_SECONDARY = "#999999"
     PLUTO_COLOR = "#2bd887"
     MARS_COLOR = "#ff8e55"
-    
+
     root.configure(bg=BG_COLOR)
-    
+
     # Main container
     main_frame = tk.Frame(root, bg=BG_COLOR)
     main_frame.grid(row=0, column=0, sticky="nsew")
-    
-    # Header with robot icon
-    header = tk.Frame(main_frame, bg=ACCENT_DARK, height=100)
+
+    # Header with professional styling
+    header = tk.Frame(main_frame, bg=HEADER_COLOR, height=130)
     header.pack(fill=tk.X)
     header.pack_propagate(False)
-    
+
     # Robot icon in header
     robot_icon = tk.Label(
         header,
         text="🤖",
-        font=("Segoe UI", 48),
-        bg=ACCENT_DARK,
-        fg="#00d9a5"
-    )
-    robot_icon.pack(side=tk.LEFT, padx=20, pady=10)
-    
-    header_label = tk.Label(
-        header,
-        text="HOMER Training System",
-        font=("Segoe UI", 28, "bold"),
-        bg=ACCENT_DARK,
+        font=("Arial", 48),
+        bg=HEADER_COLOR,
         fg=TEXT_PRIMARY
     )
-    header_label.pack(side=tk.LEFT, padx=10, pady=10)
+    robot_icon.pack(side=tk.LEFT, padx=30, pady=20)
+
+    # Header text section
+    header_text_frame = tk.Frame(header, bg=HEADER_COLOR)
+    header_text_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=20)
+
+    header_title = tk.Label(
+        header_text_frame,
+        text="Training Programs",
+        font=("Arial", 32, "bold"),
+        bg=HEADER_COLOR,
+        fg=TEXT_PRIMARY
+    )
+    header_title.pack(anchor="w")
+
+    header_subtitle = tk.Label(
+        header_text_frame,
+        text="Select Your Rehabilitation Training Program",
+        font=("Arial", 13),
+        bg=HEADER_COLOR,
+        fg="#cccccc"
+    )
+    header_subtitle.pack(anchor="w", pady=(3, 0))
     
-    # Content area
+    # Content area - maximize space usage
     content = tk.Frame(main_frame, bg=BG_COLOR)
-    content.pack(fill=tk.BOTH, expand=True, padx=40, pady=40)
-    
-    # Card container
+    content.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+
+    # Card container - full screen layout
     cards_frame = tk.Frame(content, bg=BG_COLOR)
-    cards_frame.pack(expand=True, anchor="center")
-    
-    # Load and resize images
+    cards_frame.pack(fill=tk.BOTH, expand=True)
+
+    # Load and resize images (much larger for bigger cards)
     try:
-        # Load and resize Pluto image (larger)
+        # Load and resize Pluto image
         pluto_pil = Image.open(resource_path("Pluto.png"))
-        pluto_pil = pluto_pil.resize((200, 240), Image.Resampling.LANCZOS)
+        pluto_pil = pluto_pil.resize((300, 300), Image.Resampling.LANCZOS)
         pluto_img = ImageTk.PhotoImage(pluto_pil)
 
-        # Load and resize Mars image (larger)
+        # Load and resize Mars image
         mars_pil = Image.open(resource_path("Mars.png"))
-        mars_pil = mars_pil.resize((200, 240), Image.Resampling.LANCZOS)
+        mars_pil = mars_pil.resize((300, 300), Image.Resampling.LANCZOS)
         mars_img = ImageTk.PhotoImage(mars_pil)
     except Exception as e:
         messagebox.showerror("Error", f"Could not load images: {e}")
@@ -799,77 +829,78 @@ def show_game_selection():
         mars_img = None
     
     def create_game_card(parent, name, color, image, command):
-        """Create a professional training game selection card"""
+        """Create large modern healthcare-styled training game card"""
         card = tk.Frame(
             parent,
-            bg=ACCENT_DARK,
-            highlightthickness=2,
-            highlightbackground=color,
-            highlightcolor=color
+            bg=CARD_BG,
+            highlightthickness=0,
+            relief=tk.FLAT
         )
-        card.pack(side=tk.LEFT, padx=30, ipadx=0, ipady=0, expand=True, fill=tk.BOTH)
+        card.pack(side=tk.LEFT, padx=15, ipadx=0, ipady=0, expand=True, fill=tk.BOTH)
 
-        # Card size
-        card.configure(width=450, height=520)
-        card.pack_propagate(False)
+        # Cards expand to fill all available space
+
+        # Top colored bar - thicker for modern accent
+        top_bar = tk.Frame(card, bg=color, height=8)
+        top_bar.pack(fill=tk.X)
+        top_bar.pack_propagate(False)
 
         # Hover effect
         def on_enter(_):
-            card.configure(highlightthickness=4)
+            card.configure(bg="#2a3b4d")
 
         def on_leave(_):
-            card.configure(highlightthickness=2)
+            card.configure(bg=CARD_BG)
 
         card.bind("<Enter>", on_enter)
         card.bind("<Leave>", on_leave)
 
         # Content
-        inner = tk.Frame(card, bg=ACCENT_DARK)
-        inner.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        inner = tk.Frame(card, bg=CARD_BG)
+        inner.pack(fill=tk.BOTH, expand=True, padx=35, pady=35)
 
-        # Image section (no frame)
+        # Image section - larger images with top gap
         if image:
             img_label = tk.Label(
                 inner,
                 image=image,
-                bg=ACCENT_DARK
+                bg=CARD_BG
             )
             img_label.image = image
-            img_label.pack(expand=False, pady=(0, 15))
+            img_label.pack(expand=False, pady=(50, 30))
 
-        # Title
+        # Title - much larger
         title = tk.Label(
             inner,
             text=name,
-            font=("Segoe UI", 36, "bold"),
-            bg=ACCENT_DARK,
+            font=("Arial", 56, "bold"),
+            bg=CARD_BG,
             fg=color
         )
-        title.pack(expand=False, pady=(0, 5))
+        title.pack(expand=False, pady=(0, 12))
 
         # Subtitle
         subtitle = tk.Label(
             inner,
-            text="Advanced Training Module",
-            font=("Segoe UI", 11),
-            bg=ACCENT_DARK,
-            fg="#00d9a5"
+            text="Professional Program",
+            font=("Arial", 14),
+            bg=CARD_BG,
+            fg=TEXT_SECONDARY
         )
-        subtitle.pack(expand=False, pady=(0, 5))
+        subtitle.pack(expand=False, pady=(0, 30))
 
         # Content section
-        content_frame = tk.Frame(inner, bg=ACCENT_DARK)
-        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
+        content_frame = tk.Frame(inner, bg=CARD_BG)
+        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 30))
 
-      
         # Button section (at bottom)
-        btn_frame = tk.Frame(inner, bg=ACCENT_DARK)
-        btn_frame.pack(expand=False, fill=tk.X, pady=(0, 0))
+        btn_frame = tk.Frame(inner, bg=CARD_BG)
+        btn_frame.pack(expand=False, fill=tk.X, pady=(20, 0))
 
         btn = tk.Button(
             btn_frame,
             text="▶ START TRAINING",
-            font=("Segoe UI", 13, "bold"),
+            font=("Arial", 15, "bold"),
             bg=color,
             fg="white",
             activebackground="#ffffff",
@@ -878,11 +909,11 @@ def show_game_selection():
             bd=0,
             highlightthickness=0,
             cursor="hand2",
-            width=18,
-            padx=15,
-            pady=8
+            padx=30,
+            pady=15,
+            relief=tk.FLAT
         )
-        btn.pack()
+        btn.pack(fill=tk.X)
 
         # Make entire card clickable
         card.bind("<Button-1>", lambda _: command())

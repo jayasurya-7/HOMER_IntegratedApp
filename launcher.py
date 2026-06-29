@@ -275,113 +275,205 @@ def is_training_completed(setup_file):
 
 
 def show_animation_then_auth():
-    """Show HOMER animation with professional letter-by-letter appearance and growth"""
+    """Show HOMER animation with premium healthcare-focused design"""
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
 
-    # Animation screen
-    anim_frame = tk.Frame(root, bg="#0a0a15")
+    # Animation screen with professional gradient background
+    anim_frame = tk.Frame(root, bg="#0a1829")
     anim_frame.grid(row=0, column=0, sticky="nsew")
 
     # Create canvas for animation
     anim_canvas = tk.Canvas(
         anim_frame,
-        bg="#0a0a15",
+        bg="#0a1829",
         highlightthickness=0,
         bd=0
     )
     anim_canvas.pack(fill=tk.BOTH, expand=True)
 
     # Animation state
-    anim_state = {"letters": [], "stage": "typing", "frame": 0, "current_font_size": 0}
+    anim_state = {
+        "title_id": None,
+        "tagline_id": None,
+        "top_bar_id": None,
+        "bottom_bar_id": None,
+        "stage": "fade_in",
+        "frame": 0
+    }
+
     text = "HOMER"
-    letter_delay = 200
-    growth_frames = 50
-    initial_font_size = 80
-    max_font_size = 140
+    tagline = "Rehabilitation Training"
+    fade_in_frames = 50
+    hold_frames = 80
+    fade_out_frames = 60
 
-    def add_letter():
-        """Add one letter with fade-in effect"""
-        if len(anim_state["letters"]) < len(text):
-            letter_index = len(anim_state["letters"])
-            letter_text = anim_canvas.create_text(
-                0, 0,
-                text=text[letter_index],
-                font=("Segoe UI", initial_font_size, "bold"),
-                fill="#2bd887",
-                anchor="center"
-            )
-            anim_state["letters"].append({"id": letter_text})
-            anim_state["current_font_size"] = initial_font_size
-            update_positions()
+    # Professional healthcare colors
+    PRIMARY_COLOR = "#00a8e8"  # Professional healthcare blue
+    ACCENT_COLOR = "#00d9ff"   # Bright accent
+    TEXT_COLOR = "#ffffff"     # White text
 
-            if letter_index < len(text) - 1:
-                root.after(letter_delay, add_letter)
-            else:
-                # All letters added, wait then start growth
-                root.after(400, start_growth)
-
-    def update_positions():
-        """Update positions with proper spacing and centering"""
+    def create_elements():
+        """Create all animation elements"""
         w = anim_canvas.winfo_width()
         h = anim_canvas.winfo_height()
 
-        if len(anim_state["letters"]) == 0:
-            return
+        # Top accent bar
+        top_bar_id = anim_canvas.create_line(
+            w/2 - 200, h/2 - 110,
+            w/2 - 200, h/2 - 110,
+            fill=PRIMARY_COLOR,
+            width=3
+        )
 
-        num_letters = len(anim_state["letters"])
-        font_size = anim_state["current_font_size"]
+        # Bottom accent bar
+        bottom_bar_id = anim_canvas.create_line(
+            w/2 + 200, h/2 + 110,
+            w/2 + 200, h/2 + 110,
+            fill=PRIMARY_COLOR,
+            width=3
+        )
 
-        # Calculate total width with proper spacing
-        char_width = font_size * 0.55
-        gap = font_size * 0.55
-        total_width = (num_letters * char_width) + ((num_letters - 1) * gap)
-        start_x = w / 2 - total_width / 2
+        # Main title
+        title_id = anim_canvas.create_text(
+            w/2, h/2 - 20,
+            text=text,
+            font=("Arial", 160, "bold"),
+            fill=TEXT_COLOR,
+            anchor="center"
+        )
 
-        for i, letter_data in enumerate(anim_state["letters"]):
-            letter_id = letter_data["id"]
-            x = start_x + (i * (char_width + gap)) + (char_width / 2)
-            anim_canvas.coords(letter_id, x, h / 2)
+        # Tagline
+        tagline_id = anim_canvas.create_text(
+            w/2, h/2 + 90,
+            text=tagline,
+            font=("Arial", 18),
+            fill=ACCENT_COLOR,
+            anchor="center"
+        )
 
-    def start_growth():
-        """Start growing the text"""
-        anim_state["stage"] = "growth"
-        anim_state["frame"] = 0
-        grow_animate()
+        anim_state["title_id"] = title_id
+        anim_state["tagline_id"] = tagline_id
+        anim_state["top_bar_id"] = top_bar_id
+        anim_state["bottom_bar_id"] = bottom_bar_id
 
-    def grow_animate():
-        """Animate text growth with smooth easing"""
+    def fade_in_animate():
+        """Fade in all elements with staggered timing"""
         frame = anim_state["frame"]
-        progress = frame / growth_frames
+        progress = frame / fade_in_frames
 
-        # Cubic easing for smooth growth
-        eased_progress = progress * progress * (3 - 2 * progress)
+        # Smooth easing
+        eased = progress * progress * (3 - 2 * progress)
+        opacity = int(255 * eased)
 
-        # Grow from initial size to max size
-        font_size = int(initial_font_size + eased_progress * (max_font_size - initial_font_size))
-        anim_state["current_font_size"] = font_size
+        # Fade in title
+        title_color = f"#{opacity:02x}{opacity:02x}{opacity:02x}"
+        anim_canvas.itemconfig(anim_state["title_id"], fill=title_color)
 
-        for letter_data in anim_state["letters"]:
-            letter_id = letter_data["id"]
-            anim_canvas.itemconfig(letter_id, font=("Segoe UI", font_size, "bold"))
+        # Fade in tagline
+        tagline_opacity = int(255 * eased * 0.9)
+        tagline_color = f"#{tagline_opacity:02x}{int(217 + (255-217)*eased):02x}{255:02x}"
+        anim_canvas.itemconfig(anim_state["tagline_id"], fill=tagline_color)
 
-        update_positions()
+        # Animate bars growing outward
+        w = anim_canvas.winfo_width()
+        h = anim_canvas.winfo_height()
+        bar_width = 200 + (150 * eased)
+
+        # Top bar - grows left
+        anim_canvas.coords(
+            anim_state["top_bar_id"],
+            w/2 - bar_width, h/2 - 110,
+            w/2 - 200, h/2 - 110
+        )
+
+        # Bottom bar - grows right
+        anim_canvas.coords(
+            anim_state["bottom_bar_id"],
+            w/2 + 200, h/2 + 110,
+            w/2 + bar_width, h/2 + 110
+        )
+
+        # Update bar color with opacity
+        bar_color = f"#{int(0 * (1-eased) + opacity * eased):02x}{int(168 * eased):02x}{int(232 * eased):02x}"
+        anim_canvas.itemconfig(anim_state["top_bar_id"], fill=bar_color)
+        anim_canvas.itemconfig(anim_state["bottom_bar_id"], fill=bar_color)
+
         anim_state["frame"] += 1
 
-        if anim_state["frame"] < growth_frames:
-            root.after(20, grow_animate)
+        if anim_state["frame"] < fade_in_frames:
+            root.after(16, fade_in_animate)
         else:
-            # Growth finished, show demo games
-            root.after(500, show_demo_games)
+            # Fade in complete, hold
+            anim_state["stage"] = "hold"
+            anim_state["frame"] = 0
+            root.after(800, hold_animate)
+
+    def hold_animate():
+        """Hold all elements at full opacity"""
+        anim_state["frame"] += 1
+        if anim_state["frame"] < hold_frames:
+            root.after(16, hold_animate)
+        else:
+            # Start fade out
+            anim_state["stage"] = "fade_out"
+            anim_state["frame"] = 0
+            fade_out_animate()
+
+    def fade_out_animate():
+        """Fade out all elements"""
+        frame = anim_state["frame"]
+        progress = frame / fade_out_frames
+
+        # Smooth easing for fade out
+        eased = progress * progress * (3 - 2 * progress)
+        opacity = int(255 * (1 - eased))
+
+        # Fade out title
+        title_color = f"#{opacity:02x}{opacity:02x}{opacity:02x}"
+        anim_canvas.itemconfig(anim_state["title_id"], fill=title_color)
+
+        # Fade out tagline
+        tagline_opacity = int(opacity * 0.9)
+        tagline_color = f"#{tagline_opacity:02x}{int(217 * (1-eased)):02x}{int(255 * (1-eased)):02x}"
+        anim_canvas.itemconfig(anim_state["tagline_id"], fill=tagline_color)
+
+        # Bars shrink inward
+        w = anim_canvas.winfo_width()
+        h = anim_canvas.winfo_height()
+        bar_width = 200 + (150 * (1 - eased))
+
+        anim_canvas.coords(
+            anim_state["top_bar_id"],
+            w/2 - bar_width, h/2 - 110,
+            w/2 - 200, h/2 - 110
+        )
+
+        anim_canvas.coords(
+            anim_state["bottom_bar_id"],
+            w/2 + 200, h/2 + 110,
+            w/2 + bar_width, h/2 + 110
+        )
+
+        bar_color = f"#{int(opacity * 0.3):02x}{int(168 * (1-eased)):02x}{int(232 * (1-eased)):02x}"
+        anim_canvas.itemconfig(anim_state["top_bar_id"], fill=bar_color)
+        anim_canvas.itemconfig(anim_state["bottom_bar_id"], fill=bar_color)
+
+        anim_state["frame"] += 1
+
+        if anim_state["frame"] < fade_out_frames:
+            root.after(16, fade_out_animate)
+        else:
+            # Fade out complete, show next screen
+            root.after(200, show_demo_games)
 
     def on_canvas_configure(_):
-        """Handle canvas resize"""
-        update_positions()
+        """Handle canvas resize and initial setup"""
+        if anim_state["title_id"] is None:
+            create_elements()
+            root.after(300, fade_in_animate)
 
     anim_canvas.bind("<Configure>", on_canvas_configure)
-
-    # Start animation
-    root.after(300, add_letter)
 
 def show_demo_games():
     """Show demo game selection (no authentication required)"""

@@ -859,7 +859,7 @@ def show_game_selection():
         inner = tk.Frame(card, bg=CARD_BG)
         inner.pack(fill=tk.BOTH, expand=True, padx=35, pady=35)
 
-        # Image section - larger images with top gap
+        # Image section
         if image:
             img_label = tk.Label(
                 inner,
@@ -867,9 +867,9 @@ def show_game_selection():
                 bg=CARD_BG
             )
             img_label.image = image
-            img_label.pack(expand=False, pady=(50, 30))
+            img_label.pack(expand=False, pady=(35, 20))
 
-        # Title - much larger
+        # Title
         title = tk.Label(
             inner,
             text=name,
@@ -888,10 +888,6 @@ def show_game_selection():
             fg=TEXT_SECONDARY
         )
         subtitle.pack(expand=False, pady=(0, 30))
-
-        # Content section (limited height to keep buttons visible)
-        content_frame = tk.Frame(inner, bg=CARD_BG)
-        content_frame.pack(fill=tk.X, expand=False, pady=(0, 20))
 
         # Button section (at bottom)
         btn_frame = tk.Frame(inner, bg=CARD_BG)

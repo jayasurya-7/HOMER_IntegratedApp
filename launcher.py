@@ -489,12 +489,12 @@ def show_demo_games():
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
 
-    # Dark professional color scheme
-    BG_COLOR = "#0a0a0a"
-    HEADER_COLOR = "#1a1a1a"
-    CARD_BG = "#151515"
+    # Professional healthcare color scheme with deep teal header
+    BG_COLOR = "#0a1829"
+    HEADER_COLOR = "#0d7377"
+    CARD_BG = "#1a2b3d"
     TEXT_PRIMARY = "#ffffff"
-    TEXT_SECONDARY = "#999999"
+    TEXT_SECONDARY = "#aaaaaa"
     PLUTO_COLOR = "#2bd887"
     MARS_COLOR = "#ff8e55"
 
@@ -537,7 +537,7 @@ def show_demo_games():
         text="Try Before Training",
         font=("Arial", 14),
         bg=HEADER_COLOR,
-        fg="#cccccc"
+        fg="#ffffff"
     )
     header_subtitle.pack(anchor="w", pady=(3, 0))
 
@@ -599,7 +599,7 @@ def show_demo_games():
         if image:
             img_label = tk.Label(inner, image=image, bg=CARD_BG)
             img_label.image = image
-            img_label.pack(expand=False, pady=(50, 30))
+            img_label.pack(expand=False, pady=(35, 20))
 
         # Title - much larger
         title = tk.Label(
@@ -630,9 +630,9 @@ def show_demo_games():
             )
         subtitle.pack(expand=False, pady=(0, 30))
 
-        # Content section
+        # Content section (limited height to keep buttons visible)
         content_frame = tk.Frame(inner, bg=CARD_BG)
-        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 30))
+        content_frame.pack(fill=tk.X, expand=False, pady=(0, 20))
 
         # Button section (at bottom)
         btn_frame = tk.Frame(inner, bg=CARD_BG)
@@ -752,12 +752,12 @@ def show_game_selection():
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
 
-    # Dark professional color scheme
-    BG_COLOR = "#0a0a0a"
-    HEADER_COLOR = "#1a1a1a"
-    CARD_BG = "#151515"
+    # Professional healthcare color scheme with deep teal header
+    BG_COLOR = "#0a1829"
+    HEADER_COLOR = "#0d7377"
+    CARD_BG = "#1a2b3d"
     TEXT_PRIMARY = "#ffffff"
-    TEXT_SECONDARY = "#999999"
+    TEXT_SECONDARY = "#aaaaaa"
     PLUTO_COLOR = "#2bd887"
     MARS_COLOR = "#ff8e55"
 
@@ -889,9 +889,9 @@ def show_game_selection():
         )
         subtitle.pack(expand=False, pady=(0, 30))
 
-        # Content section
+        # Content section (limited height to keep buttons visible)
         content_frame = tk.Frame(inner, bg=CARD_BG)
-        content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 30))
+        content_frame.pack(fill=tk.X, expand=False, pady=(0, 20))
 
         # Button section (at bottom)
         btn_frame = tk.Frame(inner, bg=CARD_BG)

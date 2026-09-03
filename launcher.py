@@ -1010,11 +1010,189 @@ if both_completed:
         fg="#888888"
     )
     subtitle.pack(pady=(0, 40))
-    
+
+    # Button container frame
+    btn_container = tk.Frame(center_frame, bg=COMP_BG)
+    btn_container.pack(pady=10)
+
+    # Data Sync button
+    def open_data_sync():
+        """Ask for engineer password and launch DataSyncManager"""
+        dialog = tk.Toplevel(root)
+        dialog.title("Engineer Access")
+        dialog.transient(root)
+        dialog.grab_set()
+        dialog.resizable(False, False)
+
+        # Center dialog
+        screen_width = dialog.winfo_screenwidth()
+        screen_height = dialog.winfo_screenheight()
+        dialog_width = 420
+        dialog_height = 220
+        x = (screen_width - dialog_width) // 2
+        y = (screen_height - dialog_height) // 2
+        dialog.geometry(f"{dialog_width}x{dialog_height}+{x}+{y}")
+
+        dialog.configure(bg="#1a1a2e")
+
+        # Header
+        header_frame = tk.Frame(dialog, bg="#1a1a2e")
+        header_frame.pack(fill=tk.X, pady=(20, 10))
+
+        lock_label = tk.Label(
+            header_frame,
+            text="🔐",
+            font=("Segoe UI", 28),
+            bg="#1a1a2e",
+            fg="#ffffff"
+        )
+        lock_label.pack(side=tk.LEFT, padx=(30, 15))
+
+        title_label = tk.Label(
+            header_frame,
+            text="Engineer Access",
+            font=("Segoe UI", 16, "bold"),
+            bg="#1a1a2e",
+            fg="#ffffff"
+        )
+        title_label.pack(side=tk.LEFT)
+
+        # Subtitle
+        subtitle = tk.Label(
+            dialog,
+            text="Enter engineer password",
+            font=("Segoe UI", 10),
+            bg="#1a1a2e",
+            fg="#888888"
+        )
+        subtitle.pack(pady=(0, 15))
+
+        # Entry frame
+        entry_frame = tk.Frame(dialog, bg="#1a1a2e")
+        entry_frame.pack(pady=10)
+
+        entry = tk.Entry(
+            entry_frame,
+            show="●",
+            font=("Segoe UI", 14),
+            width=25,
+            bd=0,
+            bg="#16213e",
+            fg="#ffffff",
+            insertbackground="#ffffff",
+            highlightthickness=2,
+            highlightcolor="#0969da",
+            highlightbackground="#16213e"
+        )
+        entry.pack(pady=5, ipady=8)
+        entry.focus()
+
+        result = [False]
+
+        def check_password():
+            pwd = entry.get()
+            if pwd == "Eng!neer":
+                result[0] = True
+                dialog.destroy()
+                # Launch DataSyncManager
+                try:
+                    # Try multiple paths to find DataSyncManager.exe
+                    possible_paths = [
+                        os.path.join(os.path.dirname(__file__), "DataSyncManager.exe"),
+                        os.path.join(os.path.dirname(sys.executable), "DataSyncManager.exe"),
+                        os.path.join(os.getcwd(), "DataSyncManager.exe"),
+                        os.path.join(os.path.dirname(__file__), "dist", "DataSyncManager.exe"),
+                    ]
+
+                    data_sync_exe = None
+                    for path in possible_paths:
+                        if os.path.exists(path):
+                            data_sync_exe = path
+                            break
+
+                    if data_sync_exe:
+                        print(f"[DEBUG] Launching DataSyncManager: {data_sync_exe}")
+                        process = subprocess.Popen([data_sync_exe])
+                        process.wait()  # Wait for DataSyncManager to close
+                        print("[DEBUG] DataSyncManager closed, returned to launcher")
+                    else:
+                        print(f"[ERROR] DataSyncManager.exe not found in any of these locations:")
+                        for path in possible_paths:
+                            print(f"  - {path}")
+                        messagebox.showerror("Error", "DataSyncManager.exe not found.\n\nMake sure both launcher.exe and DataSyncManager.exe are in the same folder.")
+                except Exception as e:
+                    print(f"[ERROR] Failed to launch DataSyncManager: {e}")
+                    messagebox.showerror("Error", f"Failed to launch DataSyncManager:\n{e}")
+            else:
+                entry.delete(0, tk.END)
+                entry.configure(highlightcolor="#ff0000")
+                entry.focus()
+
+        def cancel():
+            dialog.destroy()
+
+        # Button frame
+        btn_frame = tk.Frame(dialog, bg="#1a1a2e")
+        btn_frame.pack(pady=20)
+
+        ok_btn = tk.Button(
+            btn_frame,
+            text="Unlock",
+            command=check_password,
+            font=("Segoe UI", 11, "bold"),
+            width=12,
+            bd=0,
+            bg="#0969da",
+            fg="#ffffff",
+            activebackground="#1f6feb",
+            activeforeground="#ffffff",
+            cursor="hand2",
+            relief=tk.FLAT
+        )
+        ok_btn.pack(side=tk.LEFT, padx=10)
+
+        cancel_btn = tk.Button(
+            btn_frame,
+            text="Cancel",
+            command=cancel,
+            font=("Segoe UI", 11, "bold"),
+            width=12,
+            bd=0,
+            bg="#16213e",
+            fg="#ffffff",
+            activebackground="#0f3460",
+            activeforeground="#ffffff",
+            cursor="hand2",
+            relief=tk.FLAT
+        )
+        cancel_btn.pack(side=tk.LEFT, padx=10)
+
+        dialog.bind("<Return>", lambda e: check_password())
+        dialog.bind("<Escape>", lambda e: cancel())
+
+        root.wait_window(dialog)
+
+    data_sync_btn = tk.Button(
+        btn_container,
+        text="📊  Data Sync",
+        font=("Segoe UI", 14, "bold"),
+        bg="#0969da",
+        fg="white",
+        activebackground="#1f6feb",
+        activeforeground="white",
+        command=open_data_sync,
+        bd=0,
+        highlightthickness=0,
+        cursor="hand2",
+        width=18,
+        height=1
+    )
+    data_sync_btn.pack(side=tk.LEFT, padx=10)
+
     # Shutdown button
     shutdown_btn = tk.Button(
-        center_frame, 
-        text="⏻  Shutdown", 
+        btn_container,
+        text="⏻  Shutdown",
         font=("Segoe UI", 14, "bold"),
         bg="#e94560",
         fg="white",
@@ -1027,7 +1205,7 @@ if both_completed:
         width=18,
         height=1
     )
-    shutdown_btn.pack(pady=10)
+    shutdown_btn.pack(side=tk.LEFT, padx=10)
     # shutdown_system(delay=10)  # Auto shutdown after 30 seconds
 else:
     # Start with animation
